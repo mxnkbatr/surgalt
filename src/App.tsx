@@ -1,0 +1,71 @@
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { AuthProvider } from './auth/AuthContext'
+import { CartProvider } from './cart/CartContext'
+import { AppBoot } from './components/AppBoot'
+import { BottomNav } from './components/BottomNav'
+import { Header } from './components/Header'
+import { CardPage } from './pages/CardPage'
+import { CartPage } from './pages/CartPage'
+import { CoursePage } from './pages/CoursePage'
+import { CoursesPage } from './pages/CoursesPage'
+import { Home } from './pages/Home'
+import { AdminPage } from './pages/AdminPage'
+import { LoginPage } from './pages/LoginPage'
+import { Profile } from './pages/Profile'
+import { SignupPage } from './pages/SignupPage'
+import { TransferPage } from './pages/TransferPage'
+import { WishlistPage } from './pages/WishlistPage'
+import { WishlistProvider } from './wishlist/WishlistContext'
+
+function Shell() {
+  const { pathname } = useLocation()
+  const onCourseDetail = /^\/surgalt\/.+/.test(pathname)
+  const onPay =
+    pathname === '/card' ||
+    pathname.startsWith('/card/') ||
+    pathname === '/transfer' ||
+    pathname.startsWith('/transfer/')
+  const onAuth = pathname === '/login' || pathname === '/signup'
+  const onAdmin = pathname.startsWith('/admin')
+  const hideChrome = onCourseDetail || onPay || onAuth || onAdmin
+
+  return (
+    <div className={`app-shell${hideChrome ? ' app-shell--course' : ''}`}>
+      <Header />
+      <main className="app-main">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/surgalt" element={<CoursesPage />} />
+          <Route path="/surgalt/:slug" element={<CoursePage />} />
+          <Route path="/sags" element={<CartPage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
+          <Route path="/transfer" element={<TransferPage />} />
+          <Route path="/transfer/:slug" element={<TransferPage />} />
+          <Route path="/card" element={<CardPage />} />
+          <Route path="/card/:slug" element={<CardPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<AdminPage />} />
+        </Routes>
+      </main>
+      {!hideChrome && <BottomNav />}
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <AppBoot>
+              <Shell />
+            </AppBoot>
+          </WishlistProvider>
+        </CartProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  )
+}
