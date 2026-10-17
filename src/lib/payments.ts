@@ -1,3 +1,5 @@
+import { api } from './api'
+
 export type PaymentStatus = 'pending' | 'approved' | 'rejected'
 
 export type PaymentOrder = {
@@ -14,63 +16,36 @@ export type PaymentOrder = {
   reviewedAt?: string
 }
 
-const KEY = 'surgalt-payments'
-
-function readAll(): PaymentOrder[] {
-  try {
-    const raw = localStorage.getItem(KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw) as unknown
-    return Array.isArray(parsed) ? (parsed as PaymentOrder[]) : []
-  } catch {
-    return []
-  }
+export async function listPayments(): Promise<PaymentOrder[]> {
+  const data = await api<{ payments: PaymentOrder[] }>('/payments')
+  return data.payments
 }
 
-function writeAll(orders: PaymentOrder[]) {
-  localStorage.setItem(KEY, JSON.stringify(orders))
+export async function createPaymentOrder(input: {
+  ref: string
+  slugs: string[]
+  titles: string[]
+  amount: number
+}): Promise<PaymentOrder> {
+  const data = await api<{ payment: PaymentOrder }>('/payments', {
+    method: 'POST',
+    json: input,
+  })
+  return data.payment
 }
 
-export function listPayments(): PaymentOrder[] {
-  return readAll().sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  )
-}
-
-export function listPendingPayments(): PaymentOrder[] {
-  return listPayments().filter((o) => o.status === 'pending')
-}
-
-export function createPaymentOrder(
-  input: Omit<PaymentOrder, 'id' | 'status' | 'createdAt' | 'reviewedAt'>,
-): PaymentOrder {
-  const order: PaymentOrder = {
-    ...input,
-    id: `pay_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  }
-  writeAll([order, ...readAll()])
-  return order
-}
-
-export function updatePaymentStatus(
+export async function updatePaymentStatus(
   id: string,
   status: 'approved' | 'rejected',
-): PaymentOrder | null {
-  const all = readAll()
-  const idx = all.findIndex((o) => o.id === id)
-  if (idx < 0) return null
-  const next = {
-    ...all[idx],
-    status,
-    reviewedAt: new Date().toISOString(),
-  }
-  all[idx] = next
-  writeAll(all)
-  return next
+): Promise<PaymentOrder> {
+  const data = await api<{ payment: PaymentOrder }>(`/payments/${id}`, {
+    method: 'PATCH',
+    json: { status },
+  })
+  return data.payment
 }
 
-export function getUserPendingPayments(userId: string): PaymentOrder[] {
-  return listPayments().filter((o) => o.userId === userId && o.status === 'pending')
+export async function getUserPendingPayments(userId: string): Promise<PaymentOrder[]> {
+  const all = await listPayments()
+  return all.filter((o) => o.userId === userId && o.status === 'pending')
 }

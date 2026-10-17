@@ -31,7 +31,7 @@ export function SplashScreen({ autoHide = true }: Props) {
       <div className="splash__mark">
         <img className="splash__icon" src="/logo.svg" alt="" width="64" height="64" />
         <p className="splash__brand">
-          surgalt<span>.</span>
+          Dcapital
         </p>
       </div>
     </div>

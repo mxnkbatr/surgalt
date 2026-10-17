@@ -1,31 +1,41 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { createPortal } from 'react-dom'
+import { useAccess } from '../access/AccessContext'
 import { displayUserPhone, useAuth } from '../auth/AuthContext'
 import { useCart } from '../cart/CartContext'
+import { useCourses } from '../courses/CoursesContext'
 import { AppHeader } from '../components/AppHeader'
 import { legalDocs, type LegalDoc } from '../data/legal'
-import { getUnlocked } from '../lib/access'
-import { getUserPendingPayments } from '../lib/payments'
-import { courses, formatPrice } from '../data/courses'
+import { getUserPendingPayments, type PaymentOrder } from '../lib/payments'
+import { formatPrice, type Course } from '../data/courses'
 import { useWishlist } from '../wishlist/WishlistContext'
 
 type SheetId = LegalDoc['id'] | null
 
 export function Profile() {
   const { user, logout } = useAuth()
+  const { unlocked } = useAccess()
+  const { courses } = useCourses()
   const { count: cartCount } = useCart()
   const { count: wishCount } = useWishlist()
   const [sheet, setSheet] = useState<SheetId>(null)
+  const [pending, setPending] = useState<PaymentOrder[]>([])
+
+  useEffect(() => {
+    if (!user) return
+    void getUserPendingPayments(user.id)
+      .then(setPending)
+      .catch(() => setPending([]))
+  }, [user])
 
   if (!user) {
     return <Navigate to="/login" replace state={{ from: '/profile' }} />
   }
 
-  const owned = getUnlocked(user.id)
+  const owned = unlocked
     .map((slug) => courses.find((c) => c.slug === slug))
-    .filter(Boolean)
-  const pending = getUserPendingPayments(user.id)
+    .filter((c): c is Course => Boolean(c))
 
   const lessonsDone = owned.reduce((sum, c) => sum + (c?.lessons.length ?? 0), 0)
   const initial = (user?.name?.trim()?.[0] ?? 'С').toUpperCase()
@@ -214,7 +224,7 @@ export function Profile() {
           <button type="button" className="ios-row" onClick={() => setSheet('about')}>
             <RowIcon kind="info" />
             <span className="ios-row__text">
-              <b>surgalt. тухай</b>
+              <b>Dcapital тухай</b>
               <small>Хувилбар 1.0.0</small>
             </span>
             <Chevron />

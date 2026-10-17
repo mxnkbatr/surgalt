@@ -2,7 +2,7 @@
 export const bankAccount = {
   bankName: 'Хаан банк',
   bankNameEn: 'Khan Bank',
-  accountName: 'surgalt.',
+  accountName: 'Dcapital',
   accountNumber: '5521030606',
   iban: 'MN580005005521030606',
   /** IBAN-ыг уншихад хялбар формат */

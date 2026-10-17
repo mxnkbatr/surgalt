@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const STORAGE_KEY = 'surgalt.onboarded'
+const STORAGE_KEY = 'dcapital.onboarded'
 
 const slides = [
   {
@@ -126,7 +126,7 @@ export function Onboarding({ onDone }: Props) {
           <div className="onboard__visual-glow" aria-hidden="true" />
           <div className="onboard__visual-icon">{slide.icon}</div>
           <p className="onboard__brand">
-            surgalt<span>.</span>
+            Dcapital
           </p>
         </div>
 

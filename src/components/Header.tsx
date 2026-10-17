@@ -58,11 +58,9 @@ export function Header() {
   return (
     <header className="site-header">
       <div className="site-header__bar">
-        <Link to="/" className="site-header__brand" aria-label="surgalt нүүр">
+        <Link to="/" className="site-header__brand" aria-label="Dcapital нүүр">
           <Logo size={36} />
-          <span>
-            surgalt<span>.</span>
-          </span>
+          <span>Dcapital</span>
         </Link>
 
         <nav className="site-header__nav" aria-label="Үндсэн цэс">

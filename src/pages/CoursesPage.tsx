@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
-import { courses, formatPrice } from '../data/courses'
+import { useCourses } from '../courses/CoursesContext'
+import { formatPrice } from '../data/courses'
 
 type SortBy = 'popular' | 'rating' | 'price-asc' | 'price-desc'
 
@@ -13,6 +14,7 @@ const sorts: { id: SortBy; label: string }[] = [
 ]
 
 export function CoursesPage() {
+  const { courses } = useCourses()
   const [params] = useSearchParams()
   const [query, setQuery] = useState(params.get('q') ?? '')
   const [sort, setSort] = useState<SortBy>('popular')
@@ -38,7 +40,7 @@ export function CoursesPage() {
     })
 
     return result
-  }, [query, sort])
+  }, [query, sort, courses])
 
   return (
     <div className="courses-page ios-page">

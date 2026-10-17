@@ -14,7 +14,7 @@ type WishlistContextValue = {
   toggle: (slug: string) => void
 }
 
-const KEY = 'surgalt-wishlist'
+const KEY = 'dcapital-wishlist'
 const WishlistContext = createContext<WishlistContextValue | null>(null)
 
 function read(): string[] {

@@ -1,6 +1,8 @@
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { AccessProvider } from './access/AccessContext'
 import { AuthProvider } from './auth/AuthContext'
 import { CartProvider } from './cart/CartContext'
+import { CoursesProvider } from './courses/CoursesContext'
 import { AppBoot } from './components/AppBoot'
 import { BottomNav } from './components/BottomNav'
 import { Header } from './components/Header'
@@ -30,8 +32,8 @@ function Shell() {
   const hideChrome = onCourseDetail || onPay || onAuth || onAdmin
 
   return (
-    <div className={`app-shell${hideChrome ? ' app-shell--course' : ''}`}>
-      <Header />
+    <div className={`app-shell${hideChrome ? ' app-shell--course' : ''}${onAdmin ? ' app-shell--admin' : ''}`}>
+      {!onAdmin && <Header />}
       <main className="app-main">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -58,13 +60,17 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <AppBoot>
-              <Shell />
-            </AppBoot>
-          </WishlistProvider>
-        </CartProvider>
+        <AccessProvider>
+          <CoursesProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <AppBoot>
+                  <Shell />
+                </AppBoot>
+              </WishlistProvider>
+            </CartProvider>
+          </CoursesProvider>
+        </AccessProvider>
       </AuthProvider>
     </BrowserRouter>
   )

@@ -6,7 +6,8 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { courses, type Course } from '../data/courses'
+import { useCourses } from '../courses/CoursesContext'
+import type { Course } from '../data/courses'
 
 type CartContextValue = {
   slugs: string[]
@@ -19,7 +20,7 @@ type CartContextValue = {
   clear: () => void
 }
 
-const KEY = 'surgalt-cart'
+const KEY = 'dcapital-cart'
 const CartContext = createContext<CartContextValue | null>(null)
 
 function readCart(): string[] {
@@ -35,6 +36,7 @@ function readCart(): string[] {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { courses } = useCourses()
   const [slugs, setSlugs] = useState<string[]>(() => readCart())
 
   useEffect(() => {
@@ -60,7 +62,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       },
       clear: () => setSlugs([]),
     }
-  }, [slugs])
+  }, [slugs, courses])
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

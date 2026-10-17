@@ -1,12 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/AuthContext'
+import { useAccess } from '../access/AccessContext'
 import { useCart } from '../cart/CartContext'
 import { AppHeader } from '../components/AppHeader'
 import { formatPrice } from '../data/courses'
-import { isUnlocked } from '../lib/access'
 
 export function CartPage() {
-  const { user } = useAuth()
+  const { isUnlocked } = useAccess()
   const { items, total, count, remove } = useCart()
   const navigate = useNavigate()
 
@@ -43,7 +42,7 @@ export function CartPage() {
         <>
           <div className="ios-group">
             {items.map((course) => {
-              const owned = isUnlocked(course.slug, user?.id)
+              const owned = isUnlocked(course.slug)
               return (
                 <div key={course.id} className="cart-item">
                   <Link

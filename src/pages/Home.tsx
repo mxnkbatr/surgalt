@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AppHeader } from '../components/AppHeader'
-import { courses, formatPrice } from '../data/courses'
+import { useCourses } from '../courses/CoursesContext'
+import { formatPrice } from '../data/courses'
 import { useWishlist } from '../wishlist/WishlistContext'
 
 const filters = ['Бүгд', 'Эрэлттэй', 'Шинэ'] as const
 
 export function Home() {
+  const { courses } = useCourses()
   const [filter, setFilter] = useState<(typeof filters)[number]>('Бүгд')
   const { has, toggle } = useWishlist()
 
@@ -18,7 +20,7 @@ export function Home() {
       return courses.filter((c) => c.tag === 'Шинэ')
     }
     return courses
-  }, [filter])
+  }, [filter, courses])
 
   const featured = courses.slice(0, 3)
 
@@ -34,7 +36,7 @@ export function Home() {
         </div>
         <div className="home-hero-glass__body">
           <p className="home-hero-glass__brand">
-            surgalt<span>.</span>
+            Dcapital
           </p>
           <h1>
             <span className="home-hero-glass__line">Хичээлээ байршуул.</span>

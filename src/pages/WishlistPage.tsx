@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
-import { courses, formatPrice } from '../data/courses'
+import { useCourses } from '../courses/CoursesContext'
+import { formatPrice } from '../data/courses'
 import { useWishlist } from '../wishlist/WishlistContext'
 import { AppHeader } from '../components/AppHeader'
 
 export function WishlistPage() {
+  const { courses } = useCourses()
   const { slugs, toggle } = useWishlist()
   const items = slugs
     .map((slug) => courses.find((c) => c.slug === slug))

@@ -1,9 +1,10 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { useAccess } from '../access/AccessContext'
 import { useAuth } from '../auth/AuthContext'
 import { useCart } from '../cart/CartContext'
-import { unlockCourse, unlockCoursesForUser } from '../lib/access'
-import { formatPrice, getCourse, type Course } from '../data/courses'
+import { useCourses } from '../courses/CoursesContext'
+import { formatPrice, type Course } from '../data/courses'
 
 function onlyDigits(value: string) {
   return value.replace(/\D/g, '')
@@ -25,6 +26,8 @@ function formatExpiry(value: string) {
 export function CardPage() {
   const { slug } = useParams()
   const { user } = useAuth()
+  const { unlockCourses, unlockGuestCourse } = useAccess()
+  const { getCourse } = useCourses()
   const { items, total, clear } = useCart()
   const navigate = useNavigate()
 
@@ -61,24 +64,30 @@ export function CardPage() {
     return <Navigate to="/surgalt" replace />
   }
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault()
     if (!canSubmit || paying) return
 
     setPaying(true)
+    const slugs = orderItems.map((item) => item.slug)
 
     window.setTimeout(() => {
-      const slugs = orderItems.map((item) => item.slug)
-      if (user) {
-        unlockCoursesForUser(user.id, slugs)
-      } else {
-        for (const s of slugs) unlockCourse(s)
-      }
-      if (!single) clear()
-      const target = single
-        ? `/surgalt/${single.slug}?paid=1`
-        : `/surgalt/${orderItems[0].slug}?paid=1`
-      navigate(target, { replace: true })
+      void (async () => {
+        try {
+          if (user) {
+            await unlockCourses(slugs)
+          } else {
+            for (const s of slugs) unlockGuestCourse(s)
+          }
+          if (!single) clear()
+          const target = single
+            ? `/surgalt/${single.slug}?paid=1`
+            : `/surgalt/${orderItems[0].slug}?paid=1`
+          navigate(target, { replace: true })
+        } finally {
+          setPaying(false)
+        }
+      })()
     }, 900)
   }
 
@@ -103,7 +112,7 @@ export function CardPage() {
       <div className="card-page__inner">
         <div className="pay-card" aria-hidden="true">
           <div className="pay-card__top">
-            <span className="pay-card__brand">surgalt.</span>
+            <span className="pay-card__brand">Dcapital</span>
             <span className="pay-card__chip" />
           </div>
           <p className="pay-card__number">{displayNumber}</p>

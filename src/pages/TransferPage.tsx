@@ -4,7 +4,8 @@ import { useAuth } from '../auth/AuthContext'
 import { useCart } from '../cart/CartContext'
 import { bankAccount, formatIban, makeTransferRef } from '../data/bank'
 import { createPaymentOrder } from '../lib/payments'
-import { formatPrice, getCourse, type Course } from '../data/courses'
+import { useCourses } from '../courses/CoursesContext'
+import { formatPrice, type Course } from '../data/courses'
 
 async function copyText(value: string) {
   try {
@@ -18,6 +19,7 @@ async function copyText(value: string) {
 export function TransferPage() {
   const { slug } = useParams()
   const { user } = useAuth()
+  const { getCourse } = useCourses()
   const { items, total, clear } = useCart()
   const navigate = useNavigate()
 
@@ -59,23 +61,23 @@ export function TransferPage() {
     }
   }
 
-  function onConfirm() {
+  async function onConfirm() {
     if (!user || !checked || confirming || orderItems.length === 0) return
     setConfirming(true)
-
-    createPaymentOrder({
-      ref: transferRef,
-      userId: user.id,
-      userName: user.name,
-      phone: user.phone,
-      slugs,
-      titles: orderItems.map((c) => c.title),
-      amount: orderTotal,
-    })
-
-    if (!single) clear()
-    setDone(true)
-    setConfirming(false)
+    try {
+      await createPaymentOrder({
+        ref: transferRef,
+        slugs,
+        titles: orderItems.map((c) => c.title),
+        amount: orderTotal,
+      })
+      if (!single) clear()
+      setDone(true)
+    } catch {
+      /* алдааг UI-д дараа нэмж болно */
+    } finally {
+      setConfirming(false)
+    }
   }
 
   if (done) {
@@ -256,7 +258,7 @@ export function TransferPage() {
           type="button"
           className="btn btn-primary card-form__submit"
           disabled={!checked || confirming}
-          onClick={onConfirm}
+          onClick={() => void onConfirm()}
         >
           {confirming ? 'Илгээж байна…' : 'Хүсэлт илгээх'}
         </button>

@@ -88,7 +88,7 @@ export function AppHeader({
               <div className="app-menu__brand">
                 <Logo size={40} />
                 <div>
-                  <strong>surgalt</strong>
+                  <strong>Dcapital</strong>
                   <span>Онлайн сургалт</span>
                 </div>
               </div>
@@ -154,7 +154,7 @@ export function AppHeader({
     <>
       <header className="app-header">
         <div className="app-header__glass">
-          <Link to="/" className="app-header__brand" aria-label="surgalt нүүр">
+          <Link to="/" className="app-header__brand" aria-label="Dcapital нүүр">
             <Logo size={34} />
           </Link>
 

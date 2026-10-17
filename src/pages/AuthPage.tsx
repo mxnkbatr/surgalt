@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { formatPhoneInput, normalizePhone } from '../auth/phone'
+import { formatPhoneInput } from '../auth/phone'
 import { Logo } from '../components/Logo'
 
 type Mode = 'login' | 'signup'
@@ -38,8 +38,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
       setError(result.error)
       return
     }
-    const isAdmin = normalizePhone(phone) === '90000000'
-    navigate(isAdmin ? '/admin' : from, { replace: true })
+    navigate(result.user.isAdmin ? '/admin' : from, { replace: true })
   }
 
   return (
@@ -61,7 +60,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
         <Link to="/" className="auth-page__brand">
           <Logo size={32} />
           <span>
-            surgalt<span>.</span>
+            Dcapital
           </span>
         </Link>
         <span className="auth-page__spacer" aria-hidden="true" />

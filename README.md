@@ -1,4 +1,4 @@
-# surgalt.
+# Dcapital
 
 Онлайн сургалт байршуулж, худалдаж авах платформ — iOS Gen Z style.
 
@@ -9,10 +9,12 @@ npm install
 npm run dev
 ```
 
-Дараа нь [http://localhost:5173](http://localhost:5173) нээнэ.
+Frontend + API хамт асна. Дараа нь [http://localhost:5173](http://localhost:5173) нээнэ.
+
+`.env` файлд `MONGODB_URI` тавина (жишээ: `.env.example`).
 
 ## Бүтэц
 
 - `/` — нүүр + сургалтын жагсаалт
 - `/surgalt/:slug` — хичээлийн жагсаалт, видео, худалдан авалт
-- `src/data/courses.ts` — сургалтын өгөгдөл (энд шинэ хичээл нэмнэ)
+- `/admin` — админ панел (сургалт, ангилал, төлбөр)
