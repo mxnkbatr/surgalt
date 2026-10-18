@@ -1,6 +1,6 @@
 import cors from 'cors'
 import express, { type Express } from 'express'
-import { ensureDb } from './db.js'
+import { ensureDb, hasMongoUri } from './db.js'
 import { ensureAdmin } from './seed.js'
 import { ensureCourses } from './seedCourses.js'
 import { authRouter } from './routes/auth.js'
@@ -31,24 +31,35 @@ export function createApp(options?: { lazyDb?: boolean }): Express {
   app.use(cors({ origin: true }))
   app.use(express.json({ limit: '2mb' }))
 
+  // Health — DB шаардахгүй (Vercel шалгалт)
+  app.get('/api/health', (_req, res) => {
+    res.json({
+      ok: true,
+      mongoUriConfigured: hasMongoUri(),
+    })
+  })
+
   if (options?.lazyDb) {
-    app.use(async (_req, res, next) => {
+    app.use(async (req, res, next) => {
+      if (req.path === '/api/health' || req.path === '/health') {
+        next()
+        return
+      }
       try {
         await bootDb()
         next()
       } catch (err) {
         console.error('[api] db boot failed', err)
+        const missing = !hasMongoUri()
         res.status(503).json({
-          error:
-            'Database холбогдож чадсангүй. Vercel Environment Variables (MONGODB_URI) болон Atlas Network Access-ээ шалгана уу.',
+          error: missing
+            ? 'MONGODB_URI Vercel дээр тохируулаагүй байна. Settings → Environment Variables → MONGODB_URI нэмээд Redeploy хийнэ үү.'
+            : 'Database холбогдож чадсангүй. Atlas Network Access-д 0.0.0.0/0 байгаа эсэх, MONGODB_URI зөв эсэхийг шалгаад Redeploy хийнэ үү.',
+          mongoUriConfigured: !missing,
         })
       }
     })
   }
-
-  app.get('/api/health', (_req, res) => {
-    res.json({ ok: true })
-  })
 
   app.use('/api/auth', authRouter)
   app.use('/api/payments', paymentsRouter)
