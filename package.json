@@ -21,7 +21,8 @@
     "mongoose": "^9.11.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.4"
+    "react-router-dom": "^7.18.4",
+    "serverless-http": "^4.0.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

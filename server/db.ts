@@ -11,7 +11,8 @@ export function hasMongoUri() {
 }
 
 export async function ensureDb(attempts = 3) {
-  const uri = process.env.MONGODB_URI?.trim()
+  // Vercel дээр заримдаа "..." хашилттай paste хийгддэг
+  const uri = process.env.MONGODB_URI?.trim().replace(/^["']+|["']+$/g, '')
   if (!uri) {
     throw new Error('MONGODB_URI байхгүй — Vercel Environment Variables-д нэмнэ үү')
   }
@@ -23,22 +24,33 @@ export async function ensureDb(attempts = 3) {
   if (!globalThis.__dcapitalDbPromise) {
     globalThis.__dcapitalDbPromise = (async () => {
       let lastError: unknown
+      const strategies = [
+        { label: 'ipv4', opts: { family: 4 as const, serverSelectionTimeoutMS: 15000 } },
+        { label: 'auto', opts: { serverSelectionTimeoutMS: 15000 } },
+      ]
+
       for (let i = 1; i <= attempts; i++) {
-        try {
-          await mongoose.connect(uri, {
-            serverSelectionTimeoutMS: 10000,
-            bufferCommands: false,
-            // Vercel serverless ихэвчлэн IPv6 — Atlas-тай IPv4 шаардлагатай
-            family: 4,
-          })
-          console.log('[db] MongoDB холбогдлоо')
-          return mongoose
-        } catch (err) {
-          lastError = err
-          console.error(`[db] холболт амжилтгүй (${i}/${attempts})`, err)
-          if (i < attempts) {
-            await new Promise((r) => setTimeout(r, 1500))
+        for (const strategy of strategies) {
+          try {
+            if (mongoose.connection.readyState !== 0) {
+              await mongoose.disconnect().catch(() => undefined)
+            }
+            await mongoose.connect(uri, {
+              bufferCommands: false,
+              ...strategy.opts,
+            })
+            console.log(`[db] MongoDB холбогдлоо (${strategy.label})`)
+            return mongoose
+          } catch (err) {
+            lastError = err
+            console.error(
+              `[db] холболт амжилтгүй (${i}/${attempts}, ${strategy.label})`,
+              err instanceof Error ? err.message : err,
+            )
           }
+        }
+        if (i < attempts) {
+          await new Promise((r) => setTimeout(r, 1500))
         }
       }
       globalThis.__dcapitalDbPromise = undefined

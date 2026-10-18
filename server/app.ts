@@ -15,9 +15,14 @@ async function bootDb() {
   if (!bootPromise) {
     bootPromise = (async () => {
       await ensureDb()
-      await ensureAdmin()
-      await ensureCategories()
-      await ensureCourses()
+      // Seed алдаа login-ийг бүрэн зогсоохгүй
+      try {
+        await ensureAdmin()
+        await ensureCategories()
+        await ensureCourses()
+      } catch (seedErr) {
+        console.error('[api] seed warning', seedErr)
+      }
     })().catch((err) => {
       bootPromise = null
       throw err
@@ -51,11 +56,13 @@ export function createApp(options?: { lazyDb?: boolean }): Express {
       } catch (err) {
         console.error('[api] db boot failed', err)
         const missing = !hasMongoUri()
+        const detail = err instanceof Error ? err.message : String(err)
         res.status(503).json({
           error: missing
             ? 'MONGODB_URI Vercel дээр тохируулаагүй байна. Settings → Environment Variables → MONGODB_URI нэмээд Redeploy хийнэ үү.'
             : 'Database холбогдож чадсангүй. Atlas Network Access-д 0.0.0.0/0 байгаа эсэх, MONGODB_URI зөв эсэхийг шалгаад Redeploy хийнэ үү.',
           mongoUriConfigured: !missing,
+          detail,
         })
       }
     })
