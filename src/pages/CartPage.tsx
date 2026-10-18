@@ -96,13 +96,6 @@ export function CartPage() {
           >
             Дансаар шилжүүлэх
           </button>
-          <button
-            type="button"
-            className="btn btn-ghost cart-checkout cart-checkout--alt"
-            onClick={() => navigate('/card')}
-          >
-            Картаар төлөх
-          </button>
         </>
       )}
     </div>

@@ -40,7 +40,6 @@ export function Header() {
   ]
 
   if (
-    pathname.startsWith('/card') ||
     pathname.startsWith('/transfer') ||
     pathname === '/login' ||
     pathname === '/signup' ||

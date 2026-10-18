@@ -20,13 +20,12 @@ const slides = [
     id: 'buy',
     eyebrow: '02',
     title: 'Худалдаж ав',
-    text: 'Сагсанд нэмээд картаар төл — хичээл шууд нээгдэнэ.',
+    text: 'Сагсанд нэмээд дансаар шилжүүл — админ баталгаажуулсны дараа хичээл нээгдэнэ.',
     accent: 'linear-gradient(145deg, #1a2f28 0%, #1f6b4a 55%, #3dbf8a 120%)',
     icon: (
       <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <rect x="6" y="12" width="28" height="18" rx="5" stroke="#fff" strokeWidth="2.2" />
-        <path d="M6 18h28" stroke="#8FD9B8" strokeWidth="2.2" />
-        <circle cx="28" cy="24" r="2" fill="#8FD9B8" />
+        <rect x="7" y="10" width="26" height="20" rx="3" stroke="#fff" strokeWidth="2.2" />
+        <path d="M12 18h16M12 23h10" stroke="#8FD9B8" strokeWidth="2.2" strokeLinecap="round" />
       </svg>
     ),
   },

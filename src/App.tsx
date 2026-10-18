@@ -1,4 +1,11 @@
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+} from 'react-router-dom'
 import { AccessProvider } from './access/AccessContext'
 import { AuthProvider } from './auth/AuthContext'
 import { CartProvider } from './cart/CartContext'
@@ -6,7 +13,6 @@ import { CoursesProvider } from './courses/CoursesContext'
 import { AppBoot } from './components/AppBoot'
 import { BottomNav } from './components/BottomNav'
 import { Header } from './components/Header'
-import { CardPage } from './pages/CardPage'
 import { CartPage } from './pages/CartPage'
 import { CoursePage } from './pages/CoursePage'
 import { CoursesPage } from './pages/CoursesPage'
@@ -19,14 +25,16 @@ import { TransferPage } from './pages/TransferPage'
 import { WishlistPage } from './pages/WishlistPage'
 import { WishlistProvider } from './wishlist/WishlistContext'
 
+function CardToTransferRedirect() {
+  const { slug } = useParams()
+  return <Navigate to={slug ? `/transfer/${slug}` : '/transfer'} replace />
+}
+
 function Shell() {
   const { pathname } = useLocation()
   const onCourseDetail = /^\/surgalt\/.+/.test(pathname)
   const onPay =
-    pathname === '/card' ||
-    pathname.startsWith('/card/') ||
-    pathname === '/transfer' ||
-    pathname.startsWith('/transfer/')
+    pathname === '/transfer' || pathname.startsWith('/transfer/')
   const onAuth = pathname === '/login' || pathname === '/signup'
   const onAdmin = pathname.startsWith('/admin')
   const hideChrome = onCourseDetail || onPay || onAuth || onAdmin
@@ -43,8 +51,8 @@ function Shell() {
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/transfer" element={<TransferPage />} />
           <Route path="/transfer/:slug" element={<TransferPage />} />
-          <Route path="/card" element={<CardPage />} />
-          <Route path="/card/:slug" element={<CardPage />} />
+          <Route path="/card" element={<Navigate to="/transfer" replace />} />
+          <Route path="/card/:slug" element={<CardToTransferRedirect />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/profile" element={<Profile />} />
