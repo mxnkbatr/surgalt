@@ -11,17 +11,18 @@ import { categoriesRouter, ensureCategories } from './routes/categories.js'
 
 let bootPromise: Promise<void> | null = null
 
-async function bootDb() {
+async function bootDb(options?: { seed?: boolean }) {
   if (!bootPromise) {
     bootPromise = (async () => {
       await ensureDb()
-      // Seed алдаа login-ийг бүрэн зогсоохгүй
-      try {
-        await ensureAdmin()
-        await ensureCategories()
-        await ensureCourses()
-      } catch (seedErr) {
-        console.error('[api] seed warning', seedErr)
+      if (options?.seed !== false) {
+        try {
+          await ensureAdmin()
+          await ensureCategories()
+          await ensureCourses()
+        } catch (seedErr) {
+          console.error('[api] seed warning', seedErr)
+        }
       }
     })().catch((err) => {
       bootPromise = null
@@ -36,7 +37,6 @@ export function createApp(options?: { lazyDb?: boolean }): Express {
   app.use(cors({ origin: true }))
   app.use(express.json({ limit: '2mb' }))
 
-  // Health — DB шаардахгүй (Vercel шалгалт)
   app.get('/api/health', (_req, res) => {
     res.json({
       ok: true,
@@ -45,13 +45,14 @@ export function createApp(options?: { lazyDb?: boolean }): Express {
   })
 
   if (options?.lazyDb) {
+    // Vercel: зөвхөн холбоно, seed хийхгүй (timeout-оос зайлсхийх)
     app.use(async (req, res, next) => {
       if (req.path === '/api/health' || req.path === '/health') {
         next()
         return
       }
       try {
-        await bootDb()
+        await bootDb({ seed: false })
         next()
       } catch (err) {
         console.error('[api] db boot failed', err)
@@ -60,7 +61,7 @@ export function createApp(options?: { lazyDb?: boolean }): Express {
         res.status(503).json({
           error: missing
             ? 'MONGODB_URI Vercel дээр тохируулаагүй байна. Settings → Environment Variables → MONGODB_URI нэмээд Redeploy хийнэ үү.'
-            : 'Database холбогдож чадсангүй. Atlas Network Access-д 0.0.0.0/0 байгаа эсэх, MONGODB_URI зөв эсэхийг шалгаад Redeploy хийнэ үү.',
+            : 'Database холбогдож чадсангүй. Atlas Network Access 0.0.0.0/0 болон Redeploy шалгана уу.',
           mongoUriConfigured: !missing,
           detail,
         })
