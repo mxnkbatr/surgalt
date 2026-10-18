@@ -28,18 +28,25 @@ export async function api<T>(
   const token = getToken()
   if (token) headers.set('Authorization', `Bearer ${token}`)
 
+  const controller = new AbortController()
+  const timeoutMs = 8000
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs)
+
   let res: Response
   try {
     res = await fetch(`/api${path}`, {
       ...options,
       headers,
       body: options.json !== undefined ? JSON.stringify(options.json) : options.body,
+      signal: options.signal ?? controller.signal,
     })
   } catch {
     throw new ApiError(
       0,
-      'Серверт холбогдож чадсангүй. Терминалд npm run dev ажиллуулна уу.',
+      'Серверт холбогдож чадсангүй. API болон MongoDB холболтоо шалгана уу.',
     )
+  } finally {
+    window.clearTimeout(timer)
   }
 
   const data = (await res.json().catch(() => ({}))) as {

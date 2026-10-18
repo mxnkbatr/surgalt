@@ -35,18 +35,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
+    let cancelled = false
     const token = getToken()
     if (!token) {
       setReady(true)
       return
     }
+
+    const failSafe = window.setTimeout(() => {
+      if (!cancelled) setReady(true)
+    }, 9000)
+
     void api<{ user: AuthUser }>('/auth/me')
-      .then((data) => setUser(data.user))
-      .catch(() => {
-        setToken(null)
-        setUser(null)
+      .then((data) => {
+        if (!cancelled) setUser(data.user)
       })
-      .finally(() => setReady(true))
+      .catch(() => {
+        if (!cancelled) {
+          setToken(null)
+          setUser(null)
+        }
+      })
+      .finally(() => {
+        window.clearTimeout(failSafe)
+        if (!cancelled) setReady(true)
+      })
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(failSafe)
+    }
   }, [])
 
   const value = useMemo<AuthContextValue>(
