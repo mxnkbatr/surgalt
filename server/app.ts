@@ -35,6 +35,14 @@ async function bootDb(options?: { seed?: boolean }) {
 export function createApp(options?: { lazyDb?: boolean }): Express {
   const app = express()
   app.use(cors({ origin: true }))
+  // Express 5 + serverless body: socket.readable=false үед json() hang болдог
+  app.use((req, _res, next) => {
+    const socket = req.socket as { readable?: boolean } | null
+    if (socket && socket.readable === false) {
+      socket.readable = true
+    }
+    next()
+  })
   app.use(express.json({ limit: '2mb' }))
 
   app.get('/api/health', (_req, res) => {
@@ -43,6 +51,7 @@ export function createApp(options?: { lazyDb?: boolean }): Express {
       mongoUriConfigured: hasMongoUri(),
     })
   })
+
 
   if (options?.lazyDb) {
     // Vercel: зөвхөн холбоно, seed хийхгүй (timeout-оос зайлсхийх)
